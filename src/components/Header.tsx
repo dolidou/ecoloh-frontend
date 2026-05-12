@@ -11,37 +11,36 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow">
+    <header style={{ background: 'rgba(255, 255, 255, 0.3)', backdropFilter: 'blur(15px)', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex justify-between items-center">
           <Link to="/" className="flex items-center">
-            <span className="text-2xl font-bold text-blue-600">ECOLOH</span>
+            <span className="logo-ecoloh text-3xl">ECOLOH</span>
           </Link>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
             {isAuthenticated ? (
               <>
-                <span className="text-gray-700">
-                  Bienvenue, <strong>{user?.name}</strong>
+                <span style={{ color: 'var(--text)', fontWeight: 600 }}>
+                  Bienvenue, <strong style={{ color: 'var(--primary)' }}>{user?.name}</strong>
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                  className="btn-secondary"
+                  style={{ background: '#e74c3c', color: 'white', border: 'none' }}
                 >
                   Déconnexion
                 </button>
               </>
             ) : (
               <>
-                <Link
-                  to="/login"
-                  className="px-4 py-2 text-blue-600 hover:text-blue-700"
-                >
+                <Link to="/login" className="btn-secondary">
                   Connexion
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="btn-primary"
+                  style={{ textDecoration: 'none', display: 'inline-block' }}
                 >
                   S'inscrire
                 </Link>

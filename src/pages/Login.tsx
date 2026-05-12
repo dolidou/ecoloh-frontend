@@ -32,72 +32,88 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4">
+      <div className="max-w-md w-full animate-fade-in">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <h1 className="logo-ecoloh text-5xl mb-2">ECOLOH</h1>
+          <p className="text-lg" style={{ color: 'var(--text)', opacity: 0.8 }}>
+            Plateforme de Billetterie Centralisée
+          </p>
+        </div>
+
+        {/* Card */}
+        <div className="card-glass">
+          <h2 className="text-3xl font-bold text-center mb-6" style={{ color: 'var(--text)' }}>
             Connexion
           </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {(error || localError) && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm font-medium text-red-800">{error || localError}</p>
-            </div>
-          )}
 
-          <div className="rounded-md shadow-sm -space-y-px">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {(error || localError) && (
+              <div className="rounded-xl p-4" style={{ background: 'rgba(231, 76, 60, 0.1)', border: '1px solid rgba(231, 76, 60, 0.3)' }}>
+                <p className="text-sm font-semibold" style={{ color: '#e74c3c' }}>
+                  {error || localError}
+                </p>
+              </div>
+            )}
+
             <div>
-              <label htmlFor="email" className="sr-only">
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text)' }}>
                 Email
               </label>
               <input
-                id="email"
-                name="email"
                 type="email"
+                name="email"
+                placeholder="admin@ecoloh.dz"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
               />
             </div>
+
             <div>
-              <label htmlFor="password" className="sr-only">
-                Password
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text)' }}>
+                Mot de passe
               </label>
               <input
-                id="password"
-                name="password"
                 type="password"
+                name="password"
+                placeholder="••••••••"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
               />
             </div>
-          </div>
 
-          <div>
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="btn-primary w-full"
             >
               {loading ? 'Connexion...' : 'Se connecter'}
             </button>
-          </div>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Pas encore inscrit?{' '}
-              <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
-                S'inscrire
-              </Link>
-            </p>
-          </div>
-        </form>
+            <div className="text-center pt-4">
+              <p className="text-sm" style={{ color: 'var(--text)', opacity: 0.7 }}>
+                Pas encore inscrit?{' '}
+                <Link
+                  to="/register"
+                  className="font-bold hover:underline"
+                  style={{ color: 'var(--primary)' }}
+                >
+                  S'inscrire
+                </Link>
+              </p>
+            </div>
+          </form>
+        </div>
+
+        {/* Demo accounts */}
+        <div className="mt-6 text-center text-sm" style={{ color: 'var(--text)', opacity: 0.6 }}>
+          <p className="font-semibold mb-1">Comptes de test:</p>
+          <p>Admin: admin@ecoloh.dz / admin123</p>
+          <p>User: user1@ecoloh.dz / user123</p>
+        </div>
       </div>
     </div>
   );

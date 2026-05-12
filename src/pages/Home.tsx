@@ -6,18 +6,17 @@ export default function Home() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            ECOLOH Billetterie
-          </h1>
-          <p className="text-xl text-gray-600 mb-8">
+        <div className="text-center animate-fade-in">
+          <h1 className="logo-ecoloh text-6xl mb-4">ECOLOH</h1>
+          <p className="text-2xl mb-8" style={{ color: 'var(--text)', opacity: 0.8 }}>
             Bienvenue sur la plateforme de billetterie centralisée
           </p>
           <a
             href="/login"
-            className="inline-block px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="btn-primary"
+            style={{ textDecoration: 'none', display: 'inline-block' }}
           >
-            Se connecter
+            Se connecter →
           </a>
         </div>
       </div>
@@ -25,22 +24,42 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen py-12 px-4">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Bienvenue {user?.name}!
-        </h1>
-        <p className="text-xl text-gray-600 mb-8">
-          Vous êtes connecté en tant que <strong>{user?.role}</strong>
-        </p>
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Prochaines étapes</h2>
-          <ul className="list-disc list-inside space-y-2 text-gray-600">
-            <li>Découvrez nos événements disponibles</li>
-            <li>Réservez vos tickets favoris</li>
-            <li>Effectuez votre paiement via SATIM</li>
-            <li>Recevez vos tickets par email avec code QR</li>
-          </ul>
+        <div className="card-glass animate-fade-in">
+          <h1 className="text-5xl font-bold mb-4" style={{ color: 'var(--text)' }}>
+            Bienvenue {user?.name}! 👋
+          </h1>
+          <p className="text-xl mb-8" style={{ color: 'var(--text)', opacity: 0.7 }}>
+            Vous êtes connecté en tant que{' '}
+            <strong style={{ color: 'var(--primary)', textTransform: 'uppercase' }}>
+              {user?.role}
+            </strong>
+          </p>
+
+          <div className="card-glass" style={{ background: 'rgba(255, 255, 255, 0.5)' }}>
+            <h2 className="text-3xl font-bold mb-4" style={{ color: 'var(--text)' }}>
+              Prochaines étapes
+            </h2>
+            <ul className="space-y-3 text-lg" style={{ color: 'var(--text)', opacity: 0.8 }}>
+              <li className="flex items-start">
+                <span style={{ color: 'var(--primary)', marginRight: '10px', fontSize: '24px' }}>🎫</span>
+                Découvrez nos événements disponibles
+              </li>
+              <li className="flex items-start">
+                <span style={{ color: 'var(--primary)', marginRight: '10px', fontSize: '24px' }}>✨</span>
+                Réservez vos tickets favoris
+              </li>
+              <li className="flex items-start">
+                <span style={{ color: 'var(--primary)', marginRight: '10px', fontSize: '24px' }}>💳</span>
+                Effectuez votre paiement via SATIM
+              </li>
+              <li className="flex items-start">
+                <span style={{ color: 'var(--primary)', marginRight: '10px', fontSize: '24px' }}>📧</span>
+                Recevez vos tickets par email avec code QR
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

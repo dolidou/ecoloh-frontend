@@ -40,78 +40,109 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4">
+      <div className="max-w-md w-full animate-fade-in">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <h1 className="logo-ecoloh text-5xl mb-2">ECOLOH</h1>
+          <p className="text-lg" style={{ color: 'var(--text)', opacity: 0.8 }}>
+            Créez votre compte
+          </p>
+        </div>
+
+        {/* Card */}
+        <div className="card-glass">
+          <h2 className="text-3xl font-bold text-center mb-6" style={{ color: 'var(--text)' }}>
             S'inscrire
           </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {(error || localError) && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm font-medium text-red-800">{error || localError}</p>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {(error || localError) && (
+              <div className="rounded-xl p-4" style={{ background: 'rgba(231, 76, 60, 0.1)', border: '1px solid rgba(231, 76, 60, 0.3)' }}>
+                <p className="text-sm font-semibold" style={{ color: '#e74c3c' }}>
+                  {error || localError}
+                </p>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text)' }}>
+                Nom complet
+              </label>
+              <input
+                type="text"
+                name="name"
+                placeholder="Votre nom"
+                required
+                value={formData.name}
+                onChange={handleChange}
+              />
             </div>
-          )}
 
-          <div className="space-y-4">
-            <input
-              type="text"
-              name="name"
-              placeholder="Nom complet"
-              required
-              className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              value={formData.name}
-              onChange={handleChange}
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              required
-              className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              value={formData.email}
-              onChange={handleChange}
-            />
-            <input
-              type="password"
-              name="password"
-              placeholder="Mot de passe"
-              required
-              className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              value={formData.password}
-              onChange={handleChange}
-            />
-            <input
-              type="password"
-              name="password_confirmation"
-              placeholder="Confirmer mot de passe"
-              required
-              className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              value={formData.password_confirmation}
-              onChange={handleChange}
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text)' }}>
+                Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                placeholder="votre@email.com"
+                required
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </div>
 
-          <div>
+            <div>
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text)' }}>
+                Mot de passe
+              </label>
+              <input
+                type="password"
+                name="password"
+                placeholder="••••••••"
+                required
+                value={formData.password}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text)' }}>
+                Confirmer le mot de passe
+              </label>
+              <input
+                type="password"
+                name="password_confirmation"
+                placeholder="••••••••"
+                required
+                value={formData.password_confirmation}
+                onChange={handleChange}
+              />
+            </div>
+
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="btn-primary w-full"
             >
-              {loading ? 'Inscription...' : 'S\'inscrire'}
+              {loading ? 'Inscription...' : 'Créer mon compte'}
             </button>
-          </div>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Déjà inscrit?{' '}
-              <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                Se connecter
-              </Link>
-            </p>
-          </div>
-        </form>
+            <div className="text-center pt-4">
+              <p className="text-sm" style={{ color: 'var(--text)', opacity: 0.7 }}>
+                Déjà inscrit?{' '}
+                <Link
+                  to="/login"
+                  className="font-bold hover:underline"
+                  style={{ color: 'var(--primary)' }}
+                >
+                  Se connecter
+                </Link>
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
