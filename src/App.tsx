@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import EventsPage from './pages/EventsPage';
+import EventDetailPage from './pages/EventDetailPage';
 
 export default function App() {
   const { loadFromLocalStorage } = useAuthStore();
@@ -25,6 +26,7 @@ export default function App() {
           {/* Public route */}
           <Route path="/" element={<Home />} />
           <Route path="/events" element={<EventsPage />} />
+          <Route path="/events/:id" element={<EventDetailPage />} />
 
           {/* Auth routes - redirect if authenticated */}
           <Route
