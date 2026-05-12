@@ -7,7 +7,10 @@ export default function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center animate-fade-in">
-          <h1 className="logo-ecoloh text-6xl mb-4">ECOLOH</h1>
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <img src="/logo-ecoloh.png" alt="Logo ECOLOH" style={{ height: '90px', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }} />
+            <h1 className="logo-ecoloh text-6xl">ECOLOH</h1>
+          </div>
           <p className="text-2xl mb-8" style={{ color: 'var(--text)', opacity: 0.8 }}>
             Bienvenue sur la plateforme de billetterie centralisée
           </p>

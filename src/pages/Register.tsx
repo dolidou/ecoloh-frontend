@@ -44,7 +44,10 @@ export default function Register() {
       <div className="max-w-md w-full animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="logo-ecoloh text-5xl mb-2">ECOLOH</h1>
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <img src="/logo-ecoloh.png" alt="Logo ECOLOH" style={{ height: '70px', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }} />
+            <h1 className="logo-ecoloh text-5xl">ECOLOH</h1>
+          </div>
           <p className="text-lg" style={{ color: 'var(--text)', opacity: 0.8 }}>
             Créez votre compte
           </p>
