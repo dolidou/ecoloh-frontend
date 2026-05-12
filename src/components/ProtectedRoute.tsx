@@ -6,7 +6,7 @@ interface ProtectedRouteProps {
   readonly children: ReactNode;
 }
 
-export function ProtectedRoute({ children }: ProtectedRouteProps) {
+export function ProtectedRoute({ children }: Readonly<ProtectedRouteProps>) {
   const { isAuthenticated } = useAuthStore();
 
   if (!isAuthenticated) {

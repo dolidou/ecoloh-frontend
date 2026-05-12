@@ -6,7 +6,7 @@ interface LayoutProps {
   readonly children: ReactNode;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children }: Readonly<LayoutProps>) {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
