@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuthStore } from '../stores/authStore';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuthStore } from "../stores/authStore";
 
 export default function Login() {
   const navigate = useNavigate();
   const { login, loading, error } = useAuthStore();
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
-  const [localError, setLocalError] = useState('');
+  const [localError, setLocalError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -18,15 +18,15 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLocalError('');
+    setLocalError("");
     try {
       await login(formData);
-      navigate('/');
+      navigate("/");
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setLocalError(err.message || 'Identifiants incorrects');
+        setLocalError(err.message || "Identifiants incorrects");
       } else {
-        setLocalError('Identifiants incorrects');
+        setLocalError("Identifiants incorrects");
       }
     }
   };
@@ -36,32 +36,43 @@ export default function Login() {
       <div className="max-w-md w-full animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <img src="/logo-ecoloh.png" alt="Logo ECOLOH" style={{ height: '70px', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }} />
-            <h1 className="logo-ecoloh text-5xl">ECOLOH</h1>
-          </div>
-          <p className="text-lg" style={{ color: 'var(--text)', opacity: 0.8 }}>
+          <p className="text-lg" style={{ color: "var(--text)", opacity: 0.8 }}>
             Plateforme de Billetterie Centralisée
           </p>
         </div>
 
         {/* Card */}
         <div className="card-glass">
-          <h2 className="text-3xl font-bold text-center mb-6" style={{ color: 'var(--text)' }}>
+          <h2
+            className="text-3xl font-bold text-center mb-6"
+            style={{ color: "var(--text)" }}
+          >
             Connexion
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {(error || localError) && (
-              <div className="rounded-xl p-4" style={{ background: 'rgba(231, 76, 60, 0.1)', border: '1px solid rgba(231, 76, 60, 0.3)' }}>
-                <p className="text-sm font-semibold" style={{ color: '#e74c3c' }}>
+              <div
+                className="rounded-xl p-4"
+                style={{
+                  background: "rgba(231, 76, 60, 0.1)",
+                  border: "1px solid rgba(231, 76, 60, 0.3)",
+                }}
+              >
+                <p
+                  className="text-sm font-semibold"
+                  style={{ color: "#e74c3c" }}
+                >
                   {error || localError}
                 </p>
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text)' }}>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: "var(--text)" }}
+              >
                 Email
               </label>
               <input
@@ -75,7 +86,10 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text)' }}>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: "var(--text)" }}
+              >
                 Mot de passe
               </label>
               <input
@@ -93,16 +107,19 @@ export default function Login() {
               disabled={loading}
               className="btn-primary w-full"
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading ? "Connexion..." : "Se connecter"}
             </button>
 
             <div className="text-center pt-4">
-              <p className="text-sm" style={{ color: 'var(--text)', opacity: 0.7 }}>
-                Pas encore inscrit?{' '}
+              <p
+                className="text-sm"
+                style={{ color: "var(--text)", opacity: 0.7 }}
+              >
+                Pas encore inscrit?{" "}
                 <Link
                   to="/register"
                   className="font-bold hover:underline"
-                  style={{ color: 'var(--primary)' }}
+                  style={{ color: "var(--primary)" }}
                 >
                   S'inscrire
                 </Link>
@@ -112,7 +129,10 @@ export default function Login() {
         </div>
 
         {/* Demo accounts */}
-        <div className="mt-6 text-center text-sm" style={{ color: 'var(--text)', opacity: 0.6 }}>
+        <div
+          className="mt-6 text-center text-sm"
+          style={{ color: "var(--text)", opacity: 0.6 }}
+        >
           <p className="font-semibold mb-1">Comptes de test:</p>
           <p>Admin: admin@ecoloh.dz / admin123</p>
           <p>User: user1@ecoloh.dz / user123</p>

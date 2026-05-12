@@ -1,17 +1,17 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuthStore } from '../stores/authStore';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuthStore } from "../stores/authStore";
 
 export default function Register() {
   const navigate = useNavigate();
   const { register, loading, error } = useAuthStore();
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
+    name: "",
+    email: "",
+    password: "",
+    password_confirmation: "",
   });
-  const [localError, setLocalError] = useState('');
+  const [localError, setLocalError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -20,21 +20,21 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLocalError('');
+    setLocalError("");
 
     if (formData.password !== formData.password_confirmation) {
-      setLocalError('Les mots de passe ne correspondent pas');
+      setLocalError("Les mots de passe ne correspondent pas");
       return;
     }
 
     try {
       await register(formData);
-      navigate('/');
+      navigate("/");
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setLocalError(err.message || 'Erreur lors de l\'inscription');
+        setLocalError(err.message || "Erreur lors de l'inscription");
       } else {
-        setLocalError('Erreur lors de l\'inscription');
+        setLocalError("Erreur lors de l'inscription");
       }
     }
   };
@@ -44,32 +44,43 @@ export default function Register() {
       <div className="max-w-md w-full animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <img src="/logo-ecoloh.png" alt="Logo ECOLOH" style={{ height: '70px', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }} />
-            <h1 className="logo-ecoloh text-5xl">ECOLOH</h1>
-          </div>
-          <p className="text-lg" style={{ color: 'var(--text)', opacity: 0.8 }}>
+          <p className="text-lg" style={{ color: "var(--text)", opacity: 0.8 }}>
             Créez votre compte
           </p>
         </div>
 
         {/* Card */}
         <div className="card-glass">
-          <h2 className="text-3xl font-bold text-center mb-6" style={{ color: 'var(--text)' }}>
+          <h2
+            className="text-3xl font-bold text-center mb-6"
+            style={{ color: "var(--text)" }}
+          >
             S'inscrire
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {(error || localError) && (
-              <div className="rounded-xl p-4" style={{ background: 'rgba(231, 76, 60, 0.1)', border: '1px solid rgba(231, 76, 60, 0.3)' }}>
-                <p className="text-sm font-semibold" style={{ color: '#e74c3c' }}>
+              <div
+                className="rounded-xl p-4"
+                style={{
+                  background: "rgba(231, 76, 60, 0.1)",
+                  border: "1px solid rgba(231, 76, 60, 0.3)",
+                }}
+              >
+                <p
+                  className="text-sm font-semibold"
+                  style={{ color: "#e74c3c" }}
+                >
                   {error || localError}
                 </p>
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text)' }}>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: "var(--text)" }}
+              >
                 Nom complet
               </label>
               <input
@@ -83,7 +94,10 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text)' }}>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: "var(--text)" }}
+              >
                 Email
               </label>
               <input
@@ -97,7 +111,10 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text)' }}>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: "var(--text)" }}
+              >
                 Mot de passe
               </label>
               <input
@@ -111,7 +128,10 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text)' }}>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: "var(--text)" }}
+              >
                 Confirmer le mot de passe
               </label>
               <input
@@ -129,16 +149,19 @@ export default function Register() {
               disabled={loading}
               className="btn-primary w-full"
             >
-              {loading ? 'Inscription...' : 'Créer mon compte'}
+              {loading ? "Inscription..." : "Créer mon compte"}
             </button>
 
             <div className="text-center pt-4">
-              <p className="text-sm" style={{ color: 'var(--text)', opacity: 0.7 }}>
-                Déjà inscrit?{' '}
+              <p
+                className="text-sm"
+                style={{ color: "var(--text)", opacity: 0.7 }}
+              >
+                Déjà inscrit?{" "}
                 <Link
                   to="/login"
                   className="font-bold hover:underline"
-                  style={{ color: 'var(--primary)' }}
+                  style={{ color: "var(--primary)" }}
                 >
                   Se connecter
                 </Link>
