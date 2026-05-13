@@ -28,8 +28,8 @@ export const useAuthStore = create<AuthState & {
         isAuthenticated: true,
         loading: false,
       });
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Erreur de connexion';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur de connexion';
       set({ error: message, loading: false });
       throw error;
     }
@@ -47,8 +47,8 @@ export const useAuthStore = create<AuthState & {
         isAuthenticated: true,
         loading: false,
       });
-    } catch (error: any) {
-      const message = error.response?.data?.message || 'Erreur d\'inscription';
+    } catch (error: unknown) {
+      const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur d\'inscription';
       set({ error: message, loading: false });
       throw error;
     }
@@ -57,7 +57,7 @@ export const useAuthStore = create<AuthState & {
   logout: async () => {
     try {
       await authService.logout();
-    } catch (error) {
+    } catch (error: unknown) { const err = error as Error;
       console.error('Logout error:', error);
     }
     localStorage.removeItem('token');
@@ -89,7 +89,7 @@ export const useAuthStore = create<AuthState & {
           user,
           isAuthenticated: true,
         });
-      } catch (error) {
+      } catch (error: unknown) { const err = error as Error;
         console.error('Failed to load auth from localStorage:', error);
       }
     }

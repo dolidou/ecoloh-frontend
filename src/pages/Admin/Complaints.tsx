@@ -14,7 +14,7 @@ export default function AdminComplaints() {
     { id: '#005', category: 'Ticket Perdu', subject: 'Code de récupération perdu', email: 'john@email.com', priority: '🟢 Bas', status: 'Résolu', date: '2025-04-30' },
   ];
 
-  let filteredComplaints = allComplaints.filter(complaint =>
+  const filteredComplaints = allComplaints.filter(complaint =>
     (complaint.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     complaint.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     complaint.category.toLowerCase().includes(searchTerm.toLowerCase())) &&

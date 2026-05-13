@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import adminService, { DashboardStats } from '../../services/adminService';
 
 export default function AdminDashboard() {
@@ -6,23 +6,23 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadStats();
-  }, []);
-
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       setLoading(true);
       const data = await adminService.getStats();
       setStats(data);
       setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors du chargement des statistiques');
+    } catch (err) {
+      setError((err as Error)?.message || 'Erreur lors du chargement des statistiques');
       console.error('Error loading stats:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
 
   if (loading) {
     return (
@@ -46,7 +46,7 @@ export default function AdminDashboard() {
   if (!stats) return null;
 
   // Prepare revenue by day chart data
-  const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  // const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
   const revenueData = Object.entries(stats.revenue_by_day).map(([date, revenue]) => ({
     date,
     revenue,

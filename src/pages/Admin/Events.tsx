@@ -1,32 +1,43 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import adminService from '../../services/adminService';
 
+interface EventData {
+  id: number;
+  title: string;
+  description: string;
+  location?: string;
+  start_date?: string;
+  total_capacity?: number;
+  status?: string;
+  featured?: boolean;
+}
+
 export default function AdminEvents() {
   const navigate = useNavigate();
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    loadEvents();
-  }, []);
-
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
     try {
       setLoading(true);
       const response = await adminService.getEvents();
       setEvents(response.data.data || []);
       setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors du chargement des événements');
+    } catch (err) {
+      setError((err as Error)?.message || 'Erreur lors du chargement des événements');
       console.error('Error loading events:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
 
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -124,7 +135,7 @@ export default function AdminEvents() {
                   <td><strong>{event.title}</strong></td>
                   <td>{event.location || 'N/A'}</td>
                   <td>Voir types</td>
-                  <td>{new Date(event.start_date).toLocaleDateString('fr-FR')}</td>
+                  <td>{event.start_date ? new Date(event.start_date).toLocaleDateString('fr-FR') : 'N/A'}</td>
                   <td>{event.total_capacity}</td>
                   <td>
                     <span className={`badge ${

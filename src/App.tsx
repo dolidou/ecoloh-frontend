@@ -20,21 +20,22 @@ import AdminTickets from './pages/Admin/Tickets';
 import AdminComplaints from './pages/Admin/Complaints';
 import AdminStatistics from './pages/Admin/Statistics';
 
+function AdminRoute({ children }: Readonly<{ children: React.ReactNode }>) {
+  const { user } = useAuthStore();
+  return user?.role === 'admin' ? (
+    <AdminLayout>{children}</AdminLayout>
+  ) : (
+    <Navigate to="/" replace />
+  );
+}
+
 export default function App() {
-  const { loadFromLocalStorage, user } = useAuthStore();
+  const { loadFromLocalStorage } = useAuthStore();
 
   useEffect(() => {
     // Load auth state from localStorage on app start
     loadFromLocalStorage();
   }, [loadFromLocalStorage]);
-
-  const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-    return user?.role === 'admin' ? (
-      <AdminLayout>{children}</AdminLayout>
-    ) : (
-      <Navigate to="/" replace />
-    );
-  };
 
   return (
     <Router>

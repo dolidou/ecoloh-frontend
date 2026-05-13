@@ -115,7 +115,7 @@ export default function EventCreate() {
     setTicketTypes(ticketTypes.filter((_, i) => i !== index));
   };
 
-  const handleTicketTypeChange = (index: number, field: string, value: any) => {
+  const handleTicketTypeChange = (index: number, field: string, value: unknown) => {
     const updated = [...ticketTypes];
     updated[index] = { ...updated[index], [field]: value };
     setTicketTypes(updated);
@@ -138,7 +138,7 @@ export default function EventCreate() {
     setFormFields(formFields.filter((_, i) => i !== index));
   };
 
-  const handleFormFieldChange = (index: number, field: string, value: any) => {
+  const handleFormFieldChange = (index: number, field: string, value: unknown) => {
     const updated = [...formFields];
     updated[index] = { ...updated[index], [field]: value };
     setFormFields(updated);
@@ -176,8 +176,8 @@ export default function EventCreate() {
 
       await adminService.createEvent(eventData);
       navigate('/admin/events');
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de la création de l\'événement');
+    } catch (err) {
+      setError((err as Error)?.message || 'Erreur lors de la création de l\'événement');
       console.error('Error creating event:', err);
     } finally {
       setLoading(false);

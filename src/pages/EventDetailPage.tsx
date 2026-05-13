@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eventService from '../services/eventService';
 import { Event, TicketType } from '../types/event';
@@ -16,13 +16,7 @@ export default function EventDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [quantities, setQuantities] = useState<{ [key: number]: number }>({});
 
-  useEffect(() => {
-    if (id) {
-      loadEvent(parseInt(id));
-    }
-  }, [id]);
-
-  const loadEvent = async (eventId: number) => {
+  const loadEvent = useCallback(async (eventId: number) => {
     try {
       setLoading(true);
       const response = await eventService.getEvent(eventId);
@@ -33,7 +27,13 @@ export default function EventDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (id) {
+      loadEvent(parseInt(id));
+    }
+  }, [id, loadEvent]);
 
   const handleQuantityChange = (ticketTypeId: number, value: number) => {
     setQuantities({

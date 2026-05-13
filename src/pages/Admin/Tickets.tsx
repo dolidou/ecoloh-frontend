@@ -18,7 +18,7 @@ export default function AdminTickets() {
     { code: 'TKT-001245', event: 'Algerassic Parc', email: 'family@email.com', qty: '4 (Pack Famille)', amount: '3,500 DA', status: 'En attente', used: '❌' },
   ];
 
-  let filteredTickets = allTickets.filter(ticket =>
+  const filteredTickets = allTickets.filter(ticket =>
     (ticket.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
     ticket.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     ticket.event.toLowerCase().includes(searchTerm.toLowerCase())) &&
