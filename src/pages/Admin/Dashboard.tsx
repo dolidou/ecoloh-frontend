@@ -12,7 +12,7 @@ export default function AdminDashboard() {
       const data = await adminService.getStats();
       setStats(data);
       setError(null);
-    ) catch (_) {
+    } catch (_) {
       setError('Erreur lors du chargement des statistiques');
       
     } finally {

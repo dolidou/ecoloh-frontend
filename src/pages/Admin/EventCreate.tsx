@@ -176,7 +176,7 @@ export default function EventCreate() {
 
       await adminService.createEvent(eventData);
       navigate('/admin/events');
-    ) catch (_) {
+    } catch (_) {
       setError('Erreur lors de la création de l\'événement');
       
     } finally {
