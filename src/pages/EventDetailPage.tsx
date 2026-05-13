@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { eventService } from '../services/eventService';
+import eventService from '../services/eventService';
 import { Event, TicketType } from '../types/event';
 import { useCartStore } from '../stores/cartStore';
 import { useAuthStore } from '../stores/authStore';
@@ -25,7 +25,7 @@ export default function EventDetailPage() {
   const loadEvent = async (eventId: number) => {
     try {
       setLoading(true);
-      const response = await eventService.getById(eventId);
+      const response = await eventService.getEvent(eventId);
       setEvent(response.data);
     } catch (err) {
       setError('Événement introuvable');

@@ -1,21 +1,23 @@
 import api from './api';
-import { EventsResponse, EventDetailResponse } from '../types/event';
 
-export const eventService = {
-  getAll: async (): Promise<EventsResponse> => {
+const eventService = {
+  // Get featured/active events (public)
+  getFeaturedEvents: async () => {
+    const response = await api.get('/events/featured');
+    return response.data;
+  },
+
+  // Get all active events (public)
+  getActiveEvents: async () => {
     const response = await api.get('/events');
     return response.data;
   },
 
-  getById: async (id: number): Promise<EventDetailResponse> => {
+  // Get single event detail (public)
+  getEvent: async (id: number) => {
     const response = await api.get(`/events/${id}`);
     return response.data;
   },
-
-  search: async (query: string): Promise<EventsResponse> => {
-    const response = await api.get('/events/search', {
-      params: { q: query },
-    });
-    return response.data;
-  },
 };
+
+export default eventService;

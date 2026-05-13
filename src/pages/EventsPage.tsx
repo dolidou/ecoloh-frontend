@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { eventService } from '../services/eventService';
+import eventService from '../services/eventService';
 import { Event } from '../types/event';
 
 export default function EventsPage() {
@@ -15,7 +15,7 @@ export default function EventsPage() {
   const loadEvents = async () => {
     try {
       setLoading(true);
-      const response = await eventService.getAll();
+      const response = await eventService.getActiveEvents();
       setEvents(response.data);
     } catch (err) {
       setError('Erreur lors du chargement des événements');

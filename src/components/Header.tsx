@@ -13,25 +13,39 @@ export default function Header() {
   return (
     <header
       style={{
-        background: "rgba(255, 255, 255, 0.3)",
+        background: "var(--glass)",
         backdropFilter: "blur(15px)",
         borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
+        position: "sticky",
+        top: 0,
+        zIndex: 1000,
       }}
     >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3">
             <img
               src="/logo-ecoloh.png"
               alt="Logo ECOLOH"
               style={{
-                height: "50px",
-                filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.2))",
+                height: "60px",
+                filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.3))",
               }}
             />
+            <h1 className="logo-ecoloh" style={{ fontSize: "2rem" }}></h1>
           </Link>
 
-          <div className="flex items-center gap-4">
+          <div
+            style={{
+              background: "rgba(255, 255, 255, 0.5)",
+              backdropFilter: "blur(10px)",
+              padding: "10px 20px",
+              borderRadius: "30px",
+              display: "flex",
+              alignItems: "center",
+              gap: "15px",
+            }}
+          >
             {isAuthenticated ? (
               <>
                 <span style={{ color: "var(--text)", fontWeight: 600 }}>
@@ -40,13 +54,40 @@ export default function Header() {
                     {user?.name}
                   </strong>
                 </span>
+                {user?.role === 'admin' && (
+                  <Link
+                    to="/admin"
+                    style={{
+                      background: "var(--primary)",
+                      color: "white",
+                      border: "none",
+                      padding: "8px 20px",
+                      borderRadius: "20px",
+                      fontWeight: 600,
+                      textDecoration: "none",
+                      transition: "all 0.3s ease",
+                    }}
+                  >
+                    📊 Admin
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
-                  className="btn-secondary"
                   style={{
                     background: "#e74c3c",
                     color: "white",
                     border: "none",
+                    padding: "8px 20px",
+                    borderRadius: "20px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "scale(1.05)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "scale(1)";
                   }}
                 >
                   Déconnexion
@@ -54,13 +95,27 @@ export default function Header() {
               </>
             ) : (
               <>
-                <Link to="/login" className="btn-secondary">
+                <Link
+                  to="/login"
+                  style={{
+                    color: "var(--text)",
+                    textDecoration: "none",
+                    fontWeight: 600,
+                    padding: "8px 20px",
+                    borderRadius: "20px",
+                    transition: "all 0.3s ease",
+                  }}
+                >
                   Connexion
                 </Link>
                 <Link
                   to="/register"
                   className="btn-primary"
-                  style={{ textDecoration: "none", display: "inline-block" }}
+                  style={{
+                    textDecoration: "none",
+                    display: "inline-block",
+                    padding: "8px 20px",
+                  }}
                 >
                   S'inscrire
                 </Link>
@@ -68,7 +123,7 @@ export default function Header() {
             )}
           </div>
         </div>
-      </nav>
+      </div>
     </header>
   );
 }
