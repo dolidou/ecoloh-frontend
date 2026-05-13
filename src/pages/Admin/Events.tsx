@@ -27,9 +27,9 @@ export default function AdminEvents() {
       const response = await adminService.getEvents();
       setEvents(response.data.data || []);
       setError(null);
-    } catch (_err) {
-      setError((err as Error)?.message || 'Erreur lors du chargement des événements');
-      console.error('Error loading events:', err);
+    ) catch (_) {
+      setError('Erreur lors du chargement des événements');
+      
     } finally {
       setLoading(false);
     }

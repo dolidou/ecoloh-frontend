@@ -57,7 +57,7 @@ export const useAuthStore = create<AuthState & {
   logout: async () => {
     try {
       await authService.logout();
-    } catch (error: unknown) { const err = error as Error;
+    } catch (error: unknown) { 
       console.error('Logout error:', error);
     }
     localStorage.removeItem('token');
@@ -89,7 +89,7 @@ export const useAuthStore = create<AuthState & {
           user,
           isAuthenticated: true,
         });
-      } catch (error: unknown) { const err = error as Error;
+      } catch (error: unknown) { 
         console.error('Failed to load auth from localStorage:', error);
       }
     }

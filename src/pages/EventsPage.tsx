@@ -15,7 +15,7 @@ export default function EventsPage() {
       setEvents(response.data);
     } catch (err) {
       setError('Erreur lors du chargement des événements');
-      console.error(err);
+      
     } finally {
       setLoading(false);
     }

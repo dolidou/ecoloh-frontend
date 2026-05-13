@@ -23,7 +23,7 @@ export default function EventDetailPage() {
       setEvent(response.data);
     } catch (err) {
       setError('Événement introuvable');
-      console.error(err);
+      
     } finally {
       setLoading(false);
     }
