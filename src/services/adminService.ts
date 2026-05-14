@@ -31,6 +31,7 @@ export interface EventFormData {
   is_featured?: boolean;
   is_category_hero?: boolean;
   category?: string;
+  cover_image?: string;
   status?: 'draft' | 'active' | 'inactive' | 'cancelled';
   theme?: {
     preset?: 'default' | 'algerassic' | 'space' | 'drift' | 'other';
