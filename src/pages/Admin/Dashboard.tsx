@@ -45,13 +45,24 @@ export default function AdminDashboard() {
 
   if (!stats) return null;
 
+  // Provide default values for stats
+  const summary = stats.summary || {
+    total_revenue: 0,
+    tickets_sold: 0,
+    active_events: 0,
+    open_complaints: 0,
+    revenue_this_week: 0,
+    tickets_today: 0,
+    critical_complaints: 0,
+  };
+
   // Prepare revenue by day chart data
   // const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-  const revenueData = Object.entries(stats.revenue_by_day).map(([date, revenue]) => ({
+  const revenueData = stats.revenue_by_day ? Object.entries(stats.revenue_by_day).map(([date, revenue]) => ({
     date,
     revenue,
     day: new Date(date).toLocaleDateString('fr-FR', { weekday: 'short' })
-  }));
+  })) : [];
 
   // Calculate max revenue for chart scaling
   const maxRevenue = Math.max(...revenueData.map(d => d.revenue), 1);
@@ -64,26 +75,26 @@ export default function AdminDashboard() {
       <div className="stats-grid">
         <div className="stat-card primary">
           <div className="stat-label">💰 Revenus Totaux</div>
-          <div className="stat-value">{stats.summary.total_revenue.toLocaleString()} DA</div>
+          <div className="stat-value">{summary.total_revenue.toLocaleString()} DA</div>
           <div className="stat-change">
-            ↑ +{stats.summary.revenue_this_week.toLocaleString()} DA cette semaine
+            ↑ +{summary.revenue_this_week.toLocaleString()} DA cette semaine
           </div>
         </div>
         <div className="stat-card primary">
           <div className="stat-label">🎟️ Tickets Vendus</div>
-          <div className="stat-value">{stats.summary.tickets_sold.toLocaleString()}</div>
-          <div className="stat-change">↑ +{stats.summary.tickets_today} aujourd'hui</div>
+          <div className="stat-value">{summary.tickets_sold.toLocaleString()}</div>
+          <div className="stat-change">↑ +{summary.tickets_today} aujourd'hui</div>
         </div>
         <div className="stat-card accent">
           <div className="stat-label">🎪 Événements Actifs</div>
-          <div className="stat-value">{stats.summary.active_events}</div>
+          <div className="stat-value">{summary.active_events}</div>
           <div className="stat-change">Événements publiés</div>
         </div>
         <div className="stat-card danger">
           <div className="stat-label">⚠️ Réclamations Ouvertes</div>
-          <div className="stat-value">{stats.summary.open_complaints}</div>
+          <div className="stat-value">{summary.open_complaints}</div>
           <div className="stat-change negative">
-            {stats.summary.critical_complaints} critiques
+            {summary.critical_complaints} critiques
           </div>
         </div>
       </div>
@@ -122,7 +133,7 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {stats.latest_tickets.map((ticket, idx) => (
+              {(stats.latest_tickets || []).map((ticket, idx) => (
                 <tr key={idx}>
                   <td>{ticket.code}</td>
                   <td>{ticket.event}</td>

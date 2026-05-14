@@ -26,14 +26,11 @@ export interface EventFormData {
   description: string;
   start_date: string;
   end_date?: string;
-  start_time?: string;
-  end_time?: string;
   location?: string;
   max_capacity: number;
-  price?: number;
-  has_child_pricing?: boolean;
-  child_price?: number;
   is_featured?: boolean;
+  is_category_hero?: boolean;
+  category?: string;
   status?: 'draft' | 'active' | 'inactive' | 'cancelled';
   theme?: {
     preset?: 'default' | 'algerassic' | 'space' | 'drift' | 'other';
@@ -74,6 +71,12 @@ const adminService = {
     return response.data;
   },
 
+  // Get single event (admin)
+  getEvent: async (id: number) => {
+    const response = await api.get(`/admin/events/${id}`);
+    return response.data;
+  },
+
   // Create event
   createEvent: async (data: EventFormData) => {
     const response = await api.post('/admin/events', data);
@@ -89,6 +92,36 @@ const adminService = {
   // Delete event
   deleteEvent: async (id: number) => {
     const response = await api.delete(`/admin/events/${id}`);
+    return response.data;
+  },
+
+  // Upload image
+  uploadImage: async (file: File) => {
+    try {
+      console.log('File object:', { name: file.name, size: file.size, type: file.type });
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await api.post('/admin/upload-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Upload successful:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      throw error;
+    }
+  },
+
+  // Delete image
+  deleteImage: async (path: string) => {
+    const response = await api.delete('/admin/delete-image', {
+      data: { path },
+    });
     return response.data;
   },
 };

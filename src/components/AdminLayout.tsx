@@ -19,6 +19,7 @@ export default function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
   const menuItems = [
     { id: 'dashboard', icon: '📊', label: 'Dashboard', path: '/admin' },
     { id: 'events', icon: '🎪', label: 'Événements', path: '/admin/events' },
+    { id: 'category-heroes', icon: '🎬', label: 'Héros & Catégories', path: '/admin/category-heroes' },
     { id: 'tickets', icon: '🎟️', label: 'Tickets', path: '/admin/tickets' },
     { id: 'complaints', icon: '📋', label: 'Réclamations', path: '/admin/complaints' },
     { id: 'statistics', icon: '📈', label: 'Statistiques', path: '/admin/statistics' },

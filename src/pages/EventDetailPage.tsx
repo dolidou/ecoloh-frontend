@@ -20,10 +20,10 @@ export default function EventDetailPage() {
     try {
       setLoading(true);
       const response = await eventService.getEvent(eventId);
-      setEvent(response.data);
+      setEvent(response.data?.data || null);
     } catch (err) {
+      console.error('Error loading event:', err);
       setError('Événement introuvable');
-      
     } finally {
       setLoading(false);
     }
@@ -53,9 +53,8 @@ export default function EventDetailPage() {
           quantity,
         },
         event.id,
-        event.name || 'Événement'
+        event.title
       );
-      // Reset quantity
       setQuantities({ ...quantities, [ticketType.id]: 0 });
     }
   };
@@ -65,7 +64,6 @@ export default function EventDetailPage() {
       navigate('/login');
       return;
     }
-    // TODO: Navigate to checkout page
     alert('Checkout en développement - Total: ' + getTotalPrice() + ' DA');
   };
 
@@ -102,35 +100,35 @@ export default function EventDetailPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Event Info */}
-          <div className="card-glass animate-fade-in">
-            {event.image_url && (
+          <div className="card-glass animate-fade-in" style={{ borderColor: event.theme?.primary_color, borderWidth: '2px' }}>
+            {event.cover_image && (
               <img
-                src={event.image_url}
-                alt={event.name || 'Événement'}
+                src={event.cover_image}
+                alt={event.title}
                 className="w-full h-64 object-cover rounded-2xl mb-6"
               />
             )}
-            <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text)' }}>
-              {event.name || 'Événement'}
+            <h1 className="text-4xl font-bold mb-4" style={{ color: event.theme?.primary_color || 'var(--text)' }}>
+              {event.title}
             </h1>
             <div className="space-y-3 mb-6">
               <div className="flex items-center gap-2">
                 <span style={{ fontSize: '24px' }}>📍</span>
                 <span style={{ color: 'var(--text)', opacity: 0.8 }}>{event.location}</span>
               </div>
-              {event.date && (
+              {event.start_date && (
                 <div className="flex items-center gap-2">
                   <span style={{ fontSize: '24px' }}>📅</span>
                   <span style={{ color: 'var(--text)', opacity: 0.8 }}>
-                    {new Date(event.date).toLocaleDateString('fr-FR')}
+                    {new Date(event.start_date).toLocaleDateString('fr-FR')}
                   </span>
                 </div>
               )}
-              {event.capacity && (
+              {!!event.total_capacity && (
                 <div className="flex items-center gap-2">
                   <span style={{ fontSize: '24px' }}>👥</span>
                   <span style={{ color: 'var(--text)', opacity: 0.8 }}>
-                    Capacité: {event.capacity} personnes
+                    Capacité: {event.total_capacity} personnes
                   </span>
                 </div>
               )}
@@ -141,8 +139,8 @@ export default function EventDetailPage() {
           </div>
 
           {/* Booking Form */}
-          <div className="card-glass animate-fade-in">
-            <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--text)' }}>
+          <div className="card-glass animate-fade-in" style={{ borderColor: event.theme?.secondary_color, borderWidth: '2px' }}>
+            <h2 className="text-3xl font-bold mb-6" style={{ color: event.theme?.primary_color || 'var(--text)' }}>
               Réserver vos tickets
             </h2>
 
@@ -151,11 +149,16 @@ export default function EventDetailPage() {
                 <div
                   key={ticketType.id}
                   className="card-glass"
-                  style={{ background: 'rgba(255, 255, 255, 0.5)', padding: '20px' }}
+                  style={{
+                    background: `${event.theme?.primary_color}10`,
+                    padding: '20px',
+                    borderColor: event.theme?.secondary_color,
+                    borderWidth: '1px',
+                  }}
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <h3 className="text-xl font-bold" style={{ color: 'var(--text)' }}>
+                      <h3 className="text-xl font-bold" style={{ color: event.theme?.primary_color || 'var(--text)' }}>
                         {ticketType.name}
                       </h3>
                       {ticketType.description && (
@@ -164,7 +167,7 @@ export default function EventDetailPage() {
                         </p>
                       )}
                     </div>
-                    <span className="text-2xl font-bold" style={{ color: 'var(--primary)' }}>
+                    <span className="text-2xl font-bold" style={{ color: event.theme?.primary_color || 'var(--primary)' }}>
                       {ticketType.price} DA
                     </span>
                   </div>
@@ -183,7 +186,10 @@ export default function EventDetailPage() {
                       onClick={() => handleAddToCart(ticketType)}
                       disabled={!quantities[ticketType.id] || quantities[ticketType.id] <= 0}
                       className="btn-primary flex-1"
-                      style={{ opacity: quantities[ticketType.id] > 0 ? 1 : 0.5 }}
+                      style={{
+                        background: event.theme?.primary_color || 'var(--primary)',
+                        opacity: quantities[ticketType.id] > 0 ? 1 : 0.5,
+                      }}
                     >
                       Ajouter au panier
                     </button>
@@ -194,8 +200,14 @@ export default function EventDetailPage() {
 
             {/* Cart Summary */}
             {items.length > 0 && (
-              <div className="card-glass" style={{ background: 'rgba(46, 204, 113, 0.1)', border: '2px solid var(--primary)' }}>
-                <h3 className="text-2xl font-bold mb-4" style={{ color: 'var(--text)' }}>
+              <div
+                className="card-glass"
+                style={{
+                  background: `${event.theme?.primary_color}15`,
+                  border: `2px solid ${event.theme?.primary_color || 'var(--primary)'}`,
+                }}
+              >
+                <h3 className="text-2xl font-bold mb-4" style={{ color: event.theme?.primary_color || 'var(--text)' }}>
                   Panier ({getTotalItems()} tickets)
                 </h3>
                 <div className="space-y-2 mb-4">
@@ -204,19 +216,26 @@ export default function EventDetailPage() {
                       <span style={{ color: 'var(--text)' }}>
                         {item.quantity}x {item.ticketTypeName}
                       </span>
-                      <span style={{ color: 'var(--text)', fontWeight: 'bold' }}>
+                      <span style={{ color: event.theme?.primary_color || 'var(--text)', fontWeight: 'bold' }}>
                         {parseFloat(item.price) * item.quantity} DA
                       </span>
                     </div>
                   ))}
                 </div>
-                <div className="border-t pt-4 mb-4" style={{ borderColor: 'var(--primary)' }}>
+                <div
+                  className="border-t pt-4 mb-4"
+                  style={{ borderColor: event.theme?.primary_color || 'var(--primary)' }}
+                >
                   <div className="flex justify-between text-2xl font-bold">
                     <span style={{ color: 'var(--text)' }}>Total:</span>
-                    <span style={{ color: 'var(--primary)' }}>{getTotalPrice()} DA</span>
+                    <span style={{ color: event.theme?.primary_color || 'var(--primary)' }}>{getTotalPrice()} DA</span>
                   </div>
                 </div>
-                <button onClick={handleCheckout} className="btn-primary w-full">
+                <button
+                  onClick={handleCheckout}
+                  className="btn-primary w-full"
+                  style={{ background: event.theme?.primary_color || 'var(--primary)' }}
+                >
                   Procéder au paiement →
                 </button>
               </div>

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import adminService, { EventFormData } from '../../services/adminService';
+import categoryService, { Category } from '../../services/categoryService';
 
 const THEME_PRESETS = {
   default: {
@@ -54,10 +55,40 @@ const FIELD_TYPES = [
   { value: 'checkbox', label: 'Case à cocher' },
 ];
 
+const EMOJI_LIST = [
+  '⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎳',
+  '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '🥅', '⛳', '⛸️', '🎣',
+  '🎽', '🎿', '⛷️', '🏂', '🪂', '🏋️', '🏌️', '🤼', '🤸', '⛹️',
+  '🤺', '🤾', '🏇', '🧘', '🚴', '🚵', '🤹', '🎪', '🦸', '🦹',
+  '🎭', '🎨', '🎬', '🎤', '🎧', '🎼', '🎹', '🥁', '🎷', '🎺',
+  '🎸', '🍕', '🍔', '🍟', '🌭', '🍿', '🍗', '🍖', '🌮', '🍱',
+  '🍜', '🍲', '🍛', '🍣', '🍝', '🍠', '🥘', '🍢', '🍤', '🥞',
+  '🍪', '🍩', '🍰', '🎂', '🍮', '🍭', '🍬', '🍫', '🍾', '🍷',
+  '🍸', '🍹', '🍺', '🥂', '🍻', '☕', '🍵', '🥤', '🧃', '🧉',
+  '🧊', '🦖', '🦕', '🦴', '🐉', '🐲', '🌲', '🌳', '🌴', '🌵',
+  '🌾', '🌿', '☘️', '🍀', '🎍', '🎎', '🎏', '🎐', '🎑', '🧧',
+  '🧨', '🚀', '🛸', '🛰️', '✈️', '🛩️', '💺', '🛶', '⛵', '🚤',
+  '🛳️', '🚢', '⛴️', '🛥️', '🌊', '⛱️', '🏖️', '🏝️', '🏜️', '🌋',
+  '⛰️', '🏔️', '🗻', '🎢', '🎡', '⛲', '⛺', '🏠', '🏡', '🏘️',
+  '🏚️', '🏗️', '🏭', '🏢', '🏬', '🏣', '🏤', '🏥', '🏦', '🏨',
+  '🏪', '🏫', '🏩', '💒', '🏛️', '⛪', '🕌', '🕍', '🛕', '🔨',
+  '⛏️', '⚒️', '🛠️', '🔧', '🔩', '⚙️', '⛓️', '🧰', '🧱', '🔐',
+  '🔒', '🔓', '🔑', '🗝️', '🚪', '🪑', '🚽', '🚿', '🛁', '🛀',
+  '🛎️', '🔔', '🔕', '🧎', '🧏', '🧖', '🧗', '🧠', '🧡',
+  '💛', '💚', '💙', '💜', '🖤', '🍽️', '🍴', '🥄'
+];
+
 export default function EventCreate() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [showNewCategoryModal, setShowNewCategoryModal] = useState(false);
+  const [newCategoryTitle, setNewCategoryTitle] = useState('');
+  const [newCategoryIcon, setNewCategoryIcon] = useState('📌');
+  const [newCategoryDescription, setNewCategoryDescription] = useState('');
+  const [creatingCategory, setCreatingCategory] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   // Basic event info
   const [title, setTitle] = useState('');
@@ -73,12 +104,17 @@ export default function EventCreate() {
   const [childPrice, setChildPrice] = useState<number>(0);
   const [isFeatured, setIsFeatured] = useState(false);
   const [status, setStatus] = useState<'draft' | 'active' | 'inactive' | 'cancelled'>('draft');
+  const [category, setCategory] = useState<string>('');
 
   // Theme
   const [themePreset, setThemePreset] = useState<'default' | 'algerassic' | 'space' | 'drift' | 'other'>('default');
   const [customTheme, setCustomTheme] = useState(THEME_PRESETS.default);
   const [backgroundImageUrl, setBackgroundImageUrl] = useState('');
   const [headerImageUrl, setHeaderImageUrl] = useState('');
+  const [backgroundImagePreview, setBackgroundImagePreview] = useState('');
+  const [headerImagePreview, setHeaderImagePreview] = useState('');
+  const [uploadingBg, setUploadingBg] = useState(false);
+  const [uploadingHeader, setUploadingHeader] = useState(false);
 
   // Ticket types
   const [ticketTypes, setTicketTypes] = useState<Array<{ name: string; description?: string; price: number; quantity: number }>>([
@@ -99,9 +135,165 @@ export default function EventCreate() {
     { field_name: 'email', field_type: 'email', field_label: 'Email', is_required: true, display_order: 2 },
   ]);
 
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const cats = await categoryService.getAll();
+        setCategories(cats);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    };
+    loadCategories();
+  }, []);
+
+  const handleCreateCategory = async () => {
+    if (!newCategoryTitle.trim()) {
+      alert('Le titre de la catégorie est requis');
+      return;
+    }
+
+    setCreatingCategory(true);
+    try {
+      const slug = newCategoryTitle.toLowerCase().replace(/\s+/g, '_');
+      const newCat = await categoryService.create({
+        slug,
+        title: newCategoryTitle,
+        description: newCategoryDescription,
+        icon: newCategoryIcon,
+      });
+
+      setCategories([...categories, newCat]);
+      setCategory(newCat.slug);
+      setShowNewCategoryModal(false);
+      setNewCategoryTitle('');
+      setNewCategoryDescription('');
+      setNewCategoryIcon('📌');
+    } catch (error) {
+      console.error('Error creating category:', error);
+      alert('Erreur lors de la création de la catégorie');
+    } finally {
+      setCreatingCategory(false);
+    }
+  };
+
   const handlePresetChange = (preset: typeof themePreset) => {
     setThemePreset(preset);
     setCustomTheme(THEME_PRESETS[preset]);
+  };
+
+  const handleImageUpload = async (file: File, type: 'background' | 'header') => {
+    if (type === 'background') {
+      setUploadingBg(true);
+    } else {
+      setUploadingHeader(true);
+    }
+
+    try {
+      const response = await adminService.uploadImage(file);
+      if (response.success) {
+        if (type === 'background') {
+          setBackgroundImageUrl(response.url);
+          setBackgroundImagePreview(response.url);
+        } else {
+          setHeaderImageUrl(response.url);
+          setHeaderImagePreview(response.url);
+        }
+      }
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      alert('Erreur lors de l\'upload de l\'image');
+    } finally {
+      if (type === 'background') {
+        setUploadingBg(false);
+      } else {
+        setUploadingHeader(false);
+      }
+    }
+  };
+
+  const extractPhotoId = (url: string): string => {
+    const match = url.match(/photos\/[a-zA-Z0-9_-]*-([a-zA-Z0-9]{11})$/);
+    return match ? match[1] : '';
+  };
+
+  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'background' | 'header') => {
+    const url = e.target.value;
+
+    if (type === 'background') {
+      setBackgroundImageUrl(url);
+      if (url && url.includes('unsplash.com')) {
+        const photoId = extractPhotoId(url);
+        if (photoId) {
+          // Call backend to avoid CORS issues
+          fetch('http://localhost:8000/api/extract-unsplash-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ photo_id: photoId })
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.url) {
+                setBackgroundImagePreview(data.url);
+              } else {
+                setBackgroundImagePreview(url);
+              }
+            })
+            .catch(err => {
+              console.warn('Image extraction error:', err);
+              setBackgroundImagePreview(url);
+            });
+        }
+      } else if (url) {
+        setBackgroundImagePreview(url);
+      } else {
+        setBackgroundImagePreview('');
+      }
+    } else {
+      setHeaderImageUrl(url);
+      if (url && url.includes('unsplash.com')) {
+        const photoId = extractPhotoId(url);
+        if (photoId) {
+          fetch(`https://unsplash.com/napi/photos/${photoId}`)
+            .then(res => {
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+              return res.json();
+            })
+            .then(data => {
+              if (data.urls?.regular) {
+                setHeaderImagePreview(data.urls.regular);
+              } else {
+                console.warn('No regular URL in response:', data);
+                setHeaderImagePreview(url);
+              }
+            })
+            .catch(err => {
+              console.warn('Unsplash API error:', err);
+              setHeaderImagePreview(url);
+            });
+        }
+      } else if (url) {
+        setHeaderImagePreview(url);
+      } else {
+        setHeaderImagePreview('');
+      }
+    }
+  };
+
+  const handleImageInputChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'background' | 'header') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (type === 'background') {
+          setBackgroundImagePreview(reader.result as string);
+        } else {
+          setHeaderImagePreview(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+      handleImageUpload(file, type);
+    }
   };
 
   const handleAddTicketType = () => {
@@ -144,7 +336,7 @@ export default function EventCreate() {
     setFormFields(updated);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -155,15 +347,12 @@ export default function EventCreate() {
         description,
         start_date: startDate,
         end_date: endDate || startDate,
-        start_time: startTime,
-        end_time: endTime,
         location,
         max_capacity: maxCapacity,
-        price,
-        has_child_pricing: hasChildPricing,
-        child_price: hasChildPricing ? childPrice : undefined,
         is_featured: isFeatured,
         status,
+        category: category || undefined,
+        cover_image: backgroundImageUrl || undefined,
         theme: {
           preset: themePreset,
           ...customTheme,
@@ -176,9 +365,9 @@ export default function EventCreate() {
 
       await adminService.createEvent(eventData);
       navigate('/admin/events');
-    } catch (_) {
+    } catch (error) {
+      console.error('Error creating event:', error);
       setError('Erreur lors de la création de l\'événement');
-      
     } finally {
       setLoading(false);
     }
@@ -216,8 +405,9 @@ export default function EventCreate() {
           <h3 className="form-section-title">📋 Informations de Base</h3>
           <div className="form-grid">
             <div className="form-group">
-              <label>Titre *</label>
+              <label htmlFor="event-title">Titre *</label>
               <input
+                id="event-title"
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -227,8 +417,9 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label>Description *</label>
+              <label htmlFor="event-description">Description *</label>
               <textarea
+                id="event-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
@@ -238,18 +429,21 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group">
-              <label>Date de début *</label>
+              <label htmlFor="event-start-date">Date de début *</label>
               <input
+                id="event-start-date"
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
                 required
               />
             </div>
 
             <div className="form-group">
-              <label>Date de fin</label>
+              <label htmlFor="event-end-date">Date de fin</label>
               <input
+                id="event-end-date"
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
@@ -258,8 +452,9 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group">
-              <label>Heure de début</label>
+              <label htmlFor="event-start-time">Heure de début</label>
               <input
+                id="event-start-time"
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
@@ -267,8 +462,9 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group">
-              <label>Heure de fin</label>
+              <label htmlFor="event-end-time">Heure de fin</label>
               <input
+                id="event-end-time"
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
@@ -276,8 +472,9 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group">
-              <label>Lieu</label>
+              <label htmlFor="event-location">Lieu</label>
               <input
+                id="event-location"
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
@@ -286,29 +483,31 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group">
-              <label>Capacité maximale *</label>
+              <label htmlFor="event-capacity">Capacité maximale *</label>
               <input
+                id="event-capacity"
                 type="number"
                 value={maxCapacity}
-                onChange={(e) => setMaxCapacity(parseInt(e.target.value))}
+                onChange={(e) => setMaxCapacity(Number.parseInt(e.target.value))}
                 required
                 min={1}
               />
             </div>
 
             <div className="form-group">
-              <label>Prix de base (DA)</label>
+              <label htmlFor="event-price">Prix de base (DA)</label>
               <input
+                id="event-price"
                 type="number"
                 value={price}
-                onChange={(e) => setPrice(parseFloat(e.target.value))}
+                onChange={(e) => setPrice(Number.parseFloat(e.target.value))}
                 min={0}
                 step={0.01}
               />
             </div>
 
             <div className="form-group">
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <label htmlFor="event-child-pricing" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <input
                   type="checkbox"
                   checked={hasChildPricing}
@@ -320,7 +519,7 @@ export default function EventCreate() {
                 <input
                   type="number"
                   value={childPrice}
-                  onChange={(e) => setChildPrice(parseFloat(e.target.value))}
+                  onChange={(e) => setChildPrice(Number.parseFloat(e.target.value))}
                   min={0}
                   step={0.01}
                   placeholder="Prix enfant"
@@ -330,8 +529,8 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group">
-              <label>Statut</label>
-              <select value={status} onChange={(e) => setStatus(e.target.value as any)}>
+              <label htmlFor="event-status">Statut</label>
+              <select id="event-status" value={status} onChange={(e) => setStatus(e.target.value as any)}>
                 <option value="draft">Brouillon</option>
                 <option value="active">Actif</option>
                 <option value="inactive">Inactif</option>
@@ -340,8 +539,45 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group">
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <label htmlFor="event-category">Catégorie</label>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <select
+                  id="event-category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  style={{ flex: 1 }}
+                >
+                  <option value="">-- Sélectionner une catégorie --</option>
+                  {categories.map((cat) => (
+                    <option key={cat.slug} value={cat.slug}>
+                      {cat.icon} {cat.title}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setShowNewCategoryModal(true)}
+                  style={{
+                    padding: '12px 16px',
+                    background: '#27ae60',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    fontSize: '1.2rem',
+                  }}
+                  title="Créer une nouvelle catégorie"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="event-featured" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <input
+                  id="event-featured"
                   type="checkbox"
                   checked={isFeatured}
                   onChange={(e) => setIsFeatured(e.target.checked)}
@@ -357,8 +593,8 @@ export default function EventCreate() {
           <h3 className="form-section-title">🎨 Personnalisation du Thème</h3>
 
           <div className="form-group">
-            <label>Thème prédéfini</label>
-            <select value={themePreset} onChange={(e) => handlePresetChange(e.target.value as any)}>
+            <label htmlFor="theme-preset">Thème prédéfini</label>
+            <select id="theme-preset" value={themePreset} onChange={(e) => handlePresetChange(e.target.value as any)}>
               <option value="default">Default (Vert)</option>
               <option value="algerassic">Algerassic (Rouge)</option>
               <option value="space">Space (Violet)</option>
@@ -369,8 +605,9 @@ export default function EventCreate() {
 
           <div className="form-grid">
             <div className="form-group">
-              <label>Couleur primaire</label>
+              <label htmlFor="color-primary">Couleur primaire</label>
               <input
+                id="color-primary"
                 type="color"
                 value={customTheme.color_primary}
                 onChange={(e) => setCustomTheme({ ...customTheme, color_primary: e.target.value })}
@@ -378,8 +615,9 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group">
-              <label>Couleur secondaire</label>
+              <label htmlFor="color-secondary">Couleur secondaire</label>
               <input
+                id="color-secondary"
                 type="color"
                 value={customTheme.color_secondary}
                 onChange={(e) => setCustomTheme({ ...customTheme, color_secondary: e.target.value })}
@@ -387,8 +625,9 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group">
-              <label>Couleur accent</label>
+              <label htmlFor="color-accent">Couleur accent</label>
               <input
+                id="color-accent"
                 type="color"
                 value={customTheme.color_accent}
                 onChange={(e) => setCustomTheme({ ...customTheme, color_accent: e.target.value })}
@@ -396,8 +635,9 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group">
-              <label>Couleur texte</label>
+              <label htmlFor="color-text">Couleur texte</label>
               <input
+                id="color-text"
                 type="color"
                 value={customTheme.color_text}
                 onChange={(e) => setCustomTheme({ ...customTheme, color_text: e.target.value })}
@@ -405,8 +645,9 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group">
-              <label>Gradient début</label>
+              <label htmlFor="gradient-start">Gradient début</label>
               <input
+                id="gradient-start"
                 type="color"
                 value={customTheme.gradient_start}
                 onChange={(e) => setCustomTheme({ ...customTheme, gradient_start: e.target.value })}
@@ -414,8 +655,9 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group">
-              <label>Gradient fin</label>
+              <label htmlFor="gradient-end">Gradient fin</label>
               <input
+                id="gradient-end"
                 type="color"
                 value={customTheme.gradient_end}
                 onChange={(e) => setCustomTheme({ ...customTheme, gradient_end: e.target.value })}
@@ -423,23 +665,77 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label>Image de fond (URL)</label>
+              <label htmlFor="bg-image">Image de fond 🖼️</label>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <input
+                  id="bg-image-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageInputChange(e, 'background')}
+                  disabled={uploadingBg}
+                  style={{ flex: 1 }}
+                />
+                {uploadingBg && <span style={{ color: '#27ae60' }}>Upload...</span>}
+              </div>
+              <p style={{ fontSize: '0.85rem', color: '#7f8c8d', margin: '0 0 10px 0' }}>OU entrez une URL</p>
               <input
-                type="url"
+                id="bg-image"
+                type="text"
                 value={backgroundImageUrl}
-                onChange={(e) => setBackgroundImageUrl(e.target.value)}
-                placeholder="https://images.unsplash.com/..."
+                onChange={(e) => handleImageUrlChange(e, 'background')}
+                placeholder="https://images.unsplash.com/... ou https://images.pexels.com/..."
               />
+              {backgroundImagePreview && (
+                <div style={{ marginTop: '15px', borderRadius: '8px', overflow: 'hidden', border: '2px solid #ddd', backgroundColor: '#f9f9f9' }}>
+                  <img
+                    src={backgroundImagePreview}
+                    alt="Aperçu bannière"
+                    style={{
+                      width: '100%',
+                      height: '200px',
+                      objectFit: 'cover',
+                      display: 'block'
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label>Image d'en-tête (URL)</label>
+              <label htmlFor="header-image">Image d'en-tête (logo) 🎭</label>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <input
+                  id="header-image-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageInputChange(e, 'header')}
+                  disabled={uploadingHeader}
+                  style={{ flex: 1 }}
+                />
+                {uploadingHeader && <span style={{ color: '#27ae60' }}>Upload...</span>}
+              </div>
+              <p style={{ fontSize: '0.85rem', color: '#7f8c8d', margin: '0 0 10px 0' }}>OU entrez une URL</p>
               <input
-                type="url"
+                id="header-image"
+                type="text"
                 value={headerImageUrl}
-                onChange={(e) => setHeaderImageUrl(e.target.value)}
-                placeholder="https://images.unsplash.com/..."
+                onChange={(e) => handleImageUrlChange(e, 'header')}
+                placeholder="https://images.unsplash.com/... ou https://images.pexels.com/..."
               />
+              {headerImagePreview && (
+                <div style={{ marginTop: '15px', borderRadius: '8px', overflow: 'hidden', border: '2px solid #ddd', backgroundColor: '#f9f9f9' }}>
+                  <img
+                    src={headerImagePreview}
+                    alt="Aperçu logo"
+                    style={{
+                      width: '100%',
+                      height: '200px',
+                      objectFit: 'cover',
+                      display: 'block'
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
@@ -561,11 +857,12 @@ export default function EventCreate() {
           </div>
 
           {formFields.map((field, index) => (
-            <div key={index} className="dynamic-item">
+            <div key={`field-${field.field_name}-${index}`} className="dynamic-item">
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Nom du champ</label>
+                  <label htmlFor={`field-name-${index}`}>Nom du champ</label>
                   <input
+                    id={`field-name-${index}`}
                     type="text"
                     value={field.field_name}
                     onChange={(e) => handleFormFieldChange(index, 'field_name', e.target.value)}
@@ -574,8 +871,9 @@ export default function EventCreate() {
                 </div>
 
                 <div className="form-group">
-                  <label>Label</label>
+                  <label htmlFor={`field-label-${index}`}>Label</label>
                   <input
+                    id={`field-label-${index}`}
                     type="text"
                     value={field.field_label}
                     onChange={(e) => handleFormFieldChange(index, 'field_label', e.target.value)}
@@ -584,8 +882,9 @@ export default function EventCreate() {
                 </div>
 
                 <div className="form-group">
-                  <label>Type de champ</label>
+                  <label htmlFor={`field-type-${index}`}>Type de champ</label>
                   <select
+                    id={`field-type-${index}`}
                     value={field.field_type}
                     onChange={(e) => handleFormFieldChange(index, 'field_type', e.target.value)}
                   >
@@ -598,8 +897,9 @@ export default function EventCreate() {
                 </div>
 
                 <div className="form-group">
-                  <label>Ordre d'affichage</label>
+                  <label htmlFor={`field-order-${index}`}>Ordre d'affichage</label>
                   <input
+                    id={`field-order-${index}`}
                     type="number"
                     value={field.display_order}
                     onChange={(e) => handleFormFieldChange(index, 'display_order', parseInt(e.target.value))}
@@ -608,8 +908,9 @@ export default function EventCreate() {
                 </div>
 
                 <div className="form-group">
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <label htmlFor={`field-required-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <input
+                      id={`field-required-${index}`}
                       type="checkbox"
                       checked={field.is_required}
                       onChange={(e) => handleFormFieldChange(index, 'is_required', e.target.checked)}
@@ -668,6 +969,179 @@ export default function EventCreate() {
           </button>
         </div>
       </form>
+
+      {/* Modal for creating new category */}
+      {showNewCategoryModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: 'white',
+            padding: '30px',
+            borderRadius: '12px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+          }}>
+            <h3 style={{ marginTop: 0 }}>➕ Créer une nouvelle catégorie</h3>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
+                Icône 🎨
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                style={{
+                  padding: '12px',
+                  border: '2px solid #ddd',
+                  borderRadius: '6px',
+                  fontSize: '2rem',
+                  width: '100%',
+                  cursor: 'pointer',
+                  background: 'white',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {newCategoryIcon}
+              </button>
+              {showEmojiPicker && (
+                <div style={{
+                  marginTop: '10px',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(10, 1fr)',
+                  gap: '5px',
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                  padding: '10px',
+                  border: '1px solid #ddd',
+                  borderRadius: '6px',
+                  background: '#f9f9f9',
+                }}>
+                  {EMOJI_LIST.map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => {
+                        setNewCategoryIcon(emoji);
+                        setShowEmojiPicker(false);
+                      }}
+                      style={{
+                        fontSize: '1.5rem',
+                        border: 'none',
+                        background: newCategoryIcon === emoji ? '#e8f5e9' : 'transparent',
+                        cursor: 'pointer',
+                        padding: '8px',
+                        borderRadius: '4px',
+                        transition: 'background 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#f0f0f0';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = newCategoryIcon === emoji ? '#e8f5e9' : 'transparent';
+                      }}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
+                Titre *
+              </label>
+              <input
+                type="text"
+                value={newCategoryTitle}
+                onChange={(e) => setNewCategoryTitle(e.target.value)}
+                placeholder="Ex: Gastronomie"
+                style={{
+                  padding: '12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '6px',
+                  fontSize: '1rem',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
+                Description
+              </label>
+              <textarea
+                value={newCategoryDescription}
+                onChange={(e) => setNewCategoryDescription(e.target.value)}
+                placeholder="Description de la catégorie..."
+                style={{
+                  padding: '12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '6px',
+                  fontSize: '1rem',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  fontFamily: 'inherit',
+                  minHeight: '80px',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowNewCategoryModal(false);
+                  setNewCategoryTitle('');
+                  setNewCategoryDescription('');
+                  setNewCategoryIcon('📌');
+                }}
+                style={{
+                  padding: '10px 20px',
+                  background: '#95a5a6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                }}
+                disabled={creatingCategory}
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleCreateCategory}
+                style={{
+                  padding: '10px 20px',
+                  background: '#27ae60',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: creatingCategory ? 'not-allowed' : 'pointer',
+                  fontWeight: '600',
+                  opacity: creatingCategory ? 0.6 : 1,
+                }}
+                disabled={creatingCategory}
+              >
+                {creatingCategory ? '⏳ Création...' : '✅ Créer'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         .section-title {

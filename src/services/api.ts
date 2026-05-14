@@ -6,10 +6,9 @@ const API_BASE_URL = 'http://localhost:8000/api';
 const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  withCredentials: true, // Important pour CSRF
+  withCredentials: true,
 });
 
 // Add token to requests
@@ -19,6 +18,12 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Only set Content-Type for non-FormData requests
+    if (!(config.data instanceof FormData) && !config.headers['Content-Type']) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

@@ -12,10 +12,10 @@ export default function EventsPage() {
     try {
       setLoading(true);
       const response = await eventService.getActiveEvents();
-      setEvents(response.data);
+      setEvents(response.data?.data || []);
     } catch (err) {
+      console.error('Error loading events:', err);
       setError('Erreur lors du chargement des événements');
-      
     } finally {
       setLoading(false);
     }
@@ -63,17 +63,26 @@ export default function EventsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.map((event) => (
-            <Link key={event.id} to={`/events/${event.id}`} className="card-glass hover:scale-105 transition-transform" style={{ textDecoration: 'none' }}>
-              {event.image_url && (
+            <Link
+              key={event.id}
+              to={`/events/${event.id}`}
+              className="card-glass hover:scale-105 transition-transform overflow-hidden"
+              style={{
+                textDecoration: 'none',
+                borderColor: event.theme?.primary_color,
+                borderWidth: '2px',
+              }}
+            >
+              {event.cover_image && (
                 <img
-                  src={event.image_url}
-                  alt={event.name || 'Événement'}
-                  className="w-full h-48 object-cover rounded-t-2xl mb-4"
+                  src={event.cover_image}
+                  alt={event.title}
+                  className="w-full h-48 object-cover mb-4"
                 />
               )}
               <div className="p-4">
-                <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--text)' }}>
-                  {event.name || 'Événement'}
+                <h3 className="text-2xl font-bold mb-2" style={{ color: event.theme?.primary_color || 'var(--text)' }}>
+                  {event.title}
                 </h3>
                 <p className="mb-3" style={{ color: 'var(--text)', opacity: 0.7 }}>
                   {event.description.substring(0, 100)}...
@@ -83,7 +92,7 @@ export default function EventsPage() {
                     📍 {event.location}
                   </span>
                   {event.ticket_types.length > 0 && (
-                    <span className="font-bold" style={{ color: 'var(--primary)' }}>
+                    <span className="font-bold" style={{ color: event.theme?.primary_color || 'var(--primary)' }}>
                       À partir de {event.ticket_types[0].price} DA
                     </span>
                   )}

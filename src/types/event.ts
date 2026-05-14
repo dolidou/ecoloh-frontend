@@ -1,30 +1,41 @@
 export interface EventTheme {
   id: number;
-  name: string;
-  color: string | null;
+  event_id: number;
+  primary_color: string;
+  secondary_color: string;
+  font_family: string;
+  logo_url: string | null;
+  banner_url: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface TicketType {
   id: number;
+  event_id: number;
   name: string;
-  price: string;
-  quantity_available: number | null;
-  quantity_sold: number;
   description: string | null;
+  price: string;
+  quantity: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Event {
   id: number;
-  name: string | null;
+  title: string;
   description: string;
-  date: string | null;
+  cover_image: string | null;
+  start_date: string;
+  end_date: string;
   location: string;
-  image_url: string | null;
-  capacity: number | null;
+  total_capacity: number;
   status: string;
-  themes: EventTheme[];
+  featured: boolean;
+  theme: EventTheme | null;
   ticket_types: TicketType[];
   created_at: string;
+  updated_at: string;
 }
 
 export interface EventsResponse {

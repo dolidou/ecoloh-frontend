@@ -11,6 +11,7 @@ interface EventData {
   total_capacity?: number;
   status?: string;
   featured?: boolean;
+  deleted_at?: string | null;
 }
 
 export default function AdminEvents() {
@@ -18,7 +19,7 @@ export default function AdminEvents() {
   const [events, setEvents] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [entriesPerPage, setEntriesPerPage] = useState(10);
+  const [entriesPerPage, setEntriesPerPage] = useState(100);
   const [searchTerm, setSearchTerm] = useState('');
 
   const loadEvents = useCallback(async () => {
@@ -27,9 +28,9 @@ export default function AdminEvents() {
       const response = await adminService.getEvents();
       setEvents(response.data.data || []);
       setError(null);
-    } catch (_) {
+    } catch (error) {
+      console.error('Error loading events:', error);
       setError('Erreur lors du chargement des événements');
-      
     } finally {
       setLoading(false);
     }
@@ -68,8 +69,9 @@ export default function AdminEvents() {
 
       <div style={{ marginBottom: '25px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
         <div className="form-group">
-          <label>🔍 Rechercher</label>
+          <label htmlFor="search-events">🔍 Rechercher</label>
           <input
+            id="search-events"
             type="text"
             placeholder="Titre, type, date..."
             value={searchTerm}
@@ -77,8 +79,8 @@ export default function AdminEvents() {
           />
         </div>
         <div className="form-group">
-          <label>&nbsp;</label>
-          <button className="btn-add" onClick={() => navigate('/admin/events/create')}>
+          <label htmlFor="create-event" style={{ visibility: 'hidden' }}>Action</label>
+          <button id="create-event" className="btn-add" onClick={() => navigate('/admin/events/create')}>
             + Nouvel Événement
           </button>
         </div>
@@ -98,10 +100,10 @@ export default function AdminEvents() {
               onChange={(e) => setEntriesPerPage(Number(e.target.value))}
               style={{ padding: '8px 12px', border: '1px solid var(--border)', borderRadius: '6px' }}
             >
-              <option value={5}>5</option>
               <option value={10}>10</option>
               <option value={25}>25</option>
               <option value={50}>50</option>
+              <option value={100}>100</option>
             </select>
             <span style={{ fontWeight: 600 }}>entries</span>
           </div>
@@ -130,29 +132,54 @@ export default function AdminEvents() {
               </tr>
             </thead>
             <tbody>
-              {filteredEvents.slice(0, entriesPerPage).map((event) => (
-                <tr key={event.id}>
-                  <td><strong>{event.title}</strong></td>
-                  <td>{event.location || 'N/A'}</td>
-                  <td>Voir types</td>
-                  <td>{event.start_date ? new Date(event.start_date).toLocaleDateString('fr-FR') : 'N/A'}</td>
-                  <td>{event.total_capacity}</td>
-                  <td>
-                    <span className={`badge ${
-                      event.status === 'active' ? 'badge-success' :
-                      event.status === 'draft' ? 'badge-pending' :
-                      'badge-info'
-                    }`}>
-                      {event.status === 'active' ? 'Actif' :
-                       event.status === 'draft' ? 'Brouillon' :
-                       event.status === 'inactive' ? 'Inactif' :
-                       'Annulé'}
-                    </span>
-                  </td>
-                  <td>{event.featured ? '✅ Oui' : '❌ Non'}</td>
-                  <td><button className="btn-small">Éditer</button></td>
-                </tr>
-              ))}
+              {filteredEvents.slice(0, entriesPerPage).map((event) => {
+                const badgeClass = event.deleted_at ? 'badge-danger' : event.status === 'active' ? 'badge-success' : event.status === 'draft' ? 'badge-pending' : 'badge-info';
+                const statusText = event.deleted_at ? 'Supprimé' : event.status === 'active' ? 'Actif' : event.status === 'draft' ? 'Brouillon' : event.status === 'inactive' ? 'Inactif' : 'Annulé';
+                return (
+                  <tr key={event.id} style={{ opacity: event.deleted_at ? 0.6 : 1 }}>
+                    <td><strong>{event.title}</strong></td>
+                    <td>{event.location || 'N/A'}</td>
+                    <td>Voir types</td>
+                    <td>{event.start_date ? new Date(event.start_date).toLocaleDateString('fr-FR') : 'N/A'}</td>
+                    <td>{event.total_capacity}</td>
+                    <td>
+                      <span className={`badge ${badgeClass}`}>
+                        {statusText}
+                      </span>
+                    </td>
+                    <td>{event.featured ? '✅ Oui' : '❌ Non'}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          className="btn-small"
+                          disabled={!!event.deleted_at}
+                          onClick={() => navigate(`/admin/events/${event.id}/edit`)}
+                        >
+                          Éditer
+                        </button>
+                        <button
+                          className="btn-small"
+                          disabled={!!event.deleted_at}
+                          onClick={async () => {
+                            if (window.confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+                              try {
+                                await adminService.deleteEvent(event.id);
+                                loadEvents();
+                              } catch (error) {
+                                console.error('Error deleting event:', error);
+                                alert('Erreur lors de la suppression');
+                              }
+                            }
+                          }}
+                          style={{ color: '#e74c3c' }}
+                        >
+                          Supprimer
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -269,6 +296,16 @@ export default function AdminEvents() {
         .badge-pending {
           background: #fff3cd;
           color: #856404;
+        }
+
+        .badge-danger {
+          background: #f8d7da;
+          color: #721c24;
+        }
+
+        .badge-info {
+          background: #d1ecf1;
+          color: #0c5460;
         }
 
         .section-title {
