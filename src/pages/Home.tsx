@@ -24,6 +24,16 @@ interface EventTheme {
   banner_url?: string;
 }
 
+interface EventFormField {
+  id: number;
+  event_id: number;
+  field_name: string;
+  field_type: string;
+  field_label: string;
+  is_required: boolean;
+  order: number;
+}
+
 interface Event {
   id: number;
   title: string;
@@ -39,6 +49,7 @@ interface Event {
     price: number;
     description?: string;
   }>;
+  form_fields?: EventFormField[];
 }
 
 export default function Home() {
@@ -55,6 +66,8 @@ export default function Home() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [categoryEvents, setCategoryEvents] = useState<Event[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [showReservationModal, setShowReservationModal] = useState(false);
+  const [formData, setFormData] = useState<Record<string, string>>({});
 
   const loadFeaturedEvents = useCallback(async () => {
     try {
@@ -159,6 +172,36 @@ export default function Home() {
       .flatMap((e) => e.ticket_types || [])
       .find((t) => t.name === selectedItem);
     return selectedTicket?.price || 0;
+  };
+
+  const handleReserve = (): void => {
+    if (!selectedItem) {
+      alert("Veuillez sélectionner une activité");
+      return;
+    }
+    setFormData({});
+    setShowReservationModal(true);
+  };
+
+  const handleFormFieldChange = (fieldName: string, value: string): void => {
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: value,
+    }));
+  };
+
+  const handlePayment = (): void => {
+    const requiredFields = selectedEvent?.form_fields?.filter((f) => f.is_required) || [];
+    const missingFields = requiredFields.filter((f) => !formData[f.field_name]);
+
+    if (missingFields.length > 0) {
+      alert(
+        `Veuillez remplir les champs obligatoires: ${missingFields.map((f) => f.field_label).join(", ")}`
+      );
+      return;
+    }
+
+    setShowReservationModal(false);
   };
 
   const showSportFields = selectedTheme === "default";
@@ -732,6 +775,7 @@ export default function Home() {
           )}
 
           <button
+            onClick={handleReserve}
             style={{
               width: "100%",
               padding: "15px",
@@ -746,7 +790,7 @@ export default function Home() {
               fontSize: "1rem",
             }}
           >
-            Payer ({getTotalPrice()} DA)
+            Réserver → ({getTotalPrice()} DA)
           </button>
         </div>
       </main>
@@ -829,6 +873,183 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Modal Réservation */}
+      {showReservationModal && selectedEvent && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 3000,
+            overflowY: "auto",
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              padding: "30px",
+              borderRadius: "24px",
+              width: "90%",
+              maxWidth: "600px",
+              color: "#333",
+              margin: "20px 0",
+            }}
+          >
+            <h2 style={{ marginTop: 0 }}>Formulaire de Réservation</h2>
+            <p style={{ color: "#666" }}>
+              Événement: <strong>{selectedEvent.title}</strong>
+            </p>
+            <p style={{ color: "#666" }}>
+              Ticket: <strong>{selectedItem}</strong>
+            </p>
+
+            {selectedEvent.form_fields && selectedEvent.form_fields.length > 0 ? (
+              <>
+                {selectedEvent.form_fields
+                  .sort((a, b) => a.order - b.order)
+                  .map((field) => (
+                    <div key={field.id} style={{ marginBottom: "15px" }}>
+                      <label
+                        style={{
+                          display: "block",
+                          marginBottom: "5px",
+                          fontWeight: 600,
+                          color: "#333",
+                        }}
+                      >
+                        {field.field_label}
+                        {field.is_required && (
+                          <span style={{ color: "#e74c3c" }}>*</span>
+                        )}
+                      </label>
+
+                      {field.field_type === "textarea" ? (
+                        <textarea
+                          value={formData[field.field_name] || ""}
+                          onChange={(e) =>
+                            handleFormFieldChange(field.field_name, e.target.value)
+                          }
+                          style={{
+                            width: "100%",
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: "1px solid #ddd",
+                            fontFamily: "inherit",
+                            minHeight: "100px",
+                            boxSizing: "border-box",
+                          }}
+                          placeholder={`Entrez ${field.field_label.toLowerCase()}`}
+                        />
+                      ) : field.field_type === "select" ? (
+                        <select
+                          value={formData[field.field_name] || ""}
+                          onChange={(e) =>
+                            handleFormFieldChange(field.field_name, e.target.value)
+                          }
+                          style={{
+                            width: "100%",
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: "1px solid #ddd",
+                            fontFamily: "inherit",
+                            boxSizing: "border-box",
+                          }}
+                        >
+                          <option value="">-- Sélectionner --</option>
+                          {field.field_label.includes("Catégorie") && (
+                            <>
+                              <option value="option1">Option 1</option>
+                              <option value="option2">Option 2</option>
+                            </>
+                          )}
+                        </select>
+                      ) : field.field_type === "checkbox" ? (
+                        <input
+                          type="checkbox"
+                          checked={formData[field.field_name] === "true"}
+                          onChange={(e) =>
+                            handleFormFieldChange(
+                              field.field_name,
+                              e.target.checked ? "true" : "false"
+                            )
+                          }
+                          style={{
+                            width: "20px",
+                            height: "20px",
+                            cursor: "pointer",
+                          }}
+                        />
+                      ) : (
+                        <input
+                          type={field.field_type === "email" ? "email" : "text"}
+                          value={formData[field.field_name] || ""}
+                          onChange={(e) =>
+                            handleFormFieldChange(field.field_name, e.target.value)
+                          }
+                          style={{
+                            width: "100%",
+                            padding: "12px",
+                            borderRadius: "8px",
+                            border: "1px solid #ddd",
+                            fontFamily: "inherit",
+                            boxSizing: "border-box",
+                          }}
+                          placeholder={`Entrez ${field.field_label.toLowerCase()}`}
+                        />
+                      )}
+                    </div>
+                  ))}
+              </>
+            ) : (
+              <p style={{ color: "#999" }}>
+                Aucun champ supplémentaire requis pour cet événement
+              </p>
+            )}
+
+            <button
+              onClick={handlePayment}
+              style={{
+                width: "100%",
+                padding: "15px",
+                background: "var(--primary)",
+                color: "white",
+                border: "none",
+                borderRadius: "12px",
+                fontWeight: 800,
+                cursor: "pointer",
+                marginTop: "20px",
+                marginBottom: "10px",
+                fontSize: "1rem",
+              }}
+            >
+              Payer ({getTotalPrice()} DA)
+            </button>
+            <button
+              onClick={() => setShowReservationModal(false)}
+              style={{
+                width: "100%",
+                padding: "15px",
+                background: "#95a5a6",
+                color: "white",
+                border: "none",
+                borderRadius: "12px",
+                fontWeight: 800,
+                cursor: "pointer",
+                fontSize: "1rem",
+              }}
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Modal Réclamation */}
       {showComplaintModal && (
