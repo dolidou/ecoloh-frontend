@@ -228,7 +228,7 @@ export default function Home() {
     };
 
     const t = selectedEvent?.theme || defaultColors;
-    const isDefaultTheme = selectedTheme === "default" || !selectedEvent?.theme;
+    const isDefaultTheme = !selectedEvent?.theme;
 
     root.style.setProperty("--primary", t.primary_color || defaultColors.primary_color);
     root.style.setProperty("--secondary", t.secondary_color || defaultColors.secondary_color);
@@ -238,7 +238,7 @@ export default function Home() {
       `linear-gradient(135deg, ${t.gradient_start || defaultColors.gradient_start} 0%, ${t.gradient_end || defaultColors.gradient_end} 100%)`
     );
     root.style.setProperty("--glass", isDefaultTheme ? "rgba(255, 255, 255, 0.7)" : "rgba(255, 255, 255, 0.05)");
-  }, [selectedEvent, selectedTheme]);
+  }, [selectedEvent]);
 
   return (
     <div
