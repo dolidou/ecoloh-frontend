@@ -864,7 +864,7 @@ export default function EventCreate() {
           </div>
 
           {formFields.map((field, index) => (
-            <div key={`field-${field.field_name}-${index}`} className="dynamic-item">
+            <div key={index} className="dynamic-item">
               <div className="form-grid">
                 <div className="form-group">
                   <label htmlFor={`field-name-${index}`}>Nom du champ</label>
