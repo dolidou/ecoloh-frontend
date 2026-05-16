@@ -162,6 +162,7 @@ export default function EventCreate() {
         title: newCategoryTitle,
         description: newCategoryDescription,
         icon: newCategoryIcon,
+        visible: false,
       });
 
       setCategories([...categories, newCat]);
