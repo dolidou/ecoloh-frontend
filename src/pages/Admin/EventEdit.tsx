@@ -54,6 +54,16 @@ export default function EventEdit() {
   const [uploadingBg, setUploadingBg] = useState(false);
 
   const [ticketTypes, setTicketTypes] = useState<Array<{ name: string; description?: string; price: number; quantity: number }>>([]);
+  const [formFields, setFormFields] = useState<
+    Array<{
+      id?: number;
+      field_name: string;
+      field_type: 'text' | 'email' | 'number' | 'phone' | 'textarea' | 'select' | 'checkbox';
+      field_label: string;
+      is_required: boolean;
+      display_order: number;
+    }>
+  >([]);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -114,6 +124,7 @@ export default function EventEdit() {
         setStatus(event.status || 'draft');
         setCategory(event.category || '');
         setTicketTypes(event.ticket_types || []);
+        setFormFields(event.form_fields || []);
         setBackgroundImageUrl(event.cover_image || '');
         setBackgroundImagePreview(event.cover_image || '');
         setError(null);
@@ -132,6 +143,29 @@ export default function EventEdit() {
     const updated = [...ticketTypes];
     updated[index] = { ...updated[index], [field]: value };
     setTicketTypes(updated);
+  };
+
+  const handleAddFormField = () => {
+    setFormFields([
+      ...formFields,
+      {
+        field_name: '',
+        field_type: 'text',
+        field_label: '',
+        is_required: false,
+        display_order: formFields.length + 1,
+      },
+    ]);
+  };
+
+  const handleRemoveFormField = (index: number) => {
+    setFormFields(formFields.filter((_, i) => i !== index));
+  };
+
+  const handleFormFieldChange = (index: number, field: string, value: unknown) => {
+    const updated = [...formFields];
+    updated[index] = { ...updated[index], [field]: value };
+    setFormFields(updated);
   };
 
   const extractPhotoId = (url: string): string => {
@@ -213,6 +247,7 @@ export default function EventEdit() {
         status,
         category: category || undefined,
         ticket_types: ticketTypes.filter(t => t.name.trim() !== ''),
+        form_fields: formFields.filter(f => f.field_name.trim() !== '' && f.field_label.trim() !== ''),
       };
 
       if (backgroundImageUrl) {
@@ -504,6 +539,111 @@ export default function EventEdit() {
             }}
           >
             + Ajouter un type de ticket
+          </button>
+        </div>
+
+        {/* Form Fields Section */}
+        <div style={{ marginTop: '30px', padding: '20px', background: '#f9f9f9', borderRadius: '12px' }}>
+          <h3 className="form-section-title">📝 Champs du Formulaire de Réservation</h3>
+          {formFields.map((field, index) => (
+            <div key={index} style={{ marginBottom: '20px', padding: '15px', background: '#f5f5f5', borderRadius: '8px' }}>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor={`field-name-${index}`}>Nom du champ</label>
+                  <input
+                    id={`field-name-${index}`}
+                    type="text"
+                    value={field.field_name}
+                    onChange={(e) => handleFormFieldChange(index, 'field_name', e.target.value)}
+                    placeholder="Ex: phone_number"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor={`field-label-${index}`}>Label</label>
+                  <input
+                    id={`field-label-${index}`}
+                    type="text"
+                    value={field.field_label}
+                    onChange={(e) => handleFormFieldChange(index, 'field_label', e.target.value)}
+                    placeholder="Ex: Numéro de téléphone"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor={`field-type-${index}`}>Type de champ</label>
+                  <select
+                    id={`field-type-${index}`}
+                    value={field.field_type}
+                    onChange={(e) => handleFormFieldChange(index, 'field_type', e.target.value)}
+                  >
+                    <option value="text">Texte</option>
+                    <option value="email">Email</option>
+                    <option value="number">Nombre</option>
+                    <option value="phone">Téléphone</option>
+                    <option value="textarea">Zone de texte</option>
+                    <option value="select">Liste déroulante</option>
+                    <option value="checkbox">Case à cocher</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor={`field-order-${index}`}>Ordre d'affichage</label>
+                  <input
+                    id={`field-order-${index}`}
+                    type="number"
+                    value={field.display_order}
+                    onChange={(e) => handleFormFieldChange(index, 'display_order', Number.parseInt(e.target.value))}
+                    min={1}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor={`field-required-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <input
+                      id={`field-required-${index}`}
+                      type="checkbox"
+                      checked={field.is_required}
+                      onChange={(e) => handleFormFieldChange(index, 'is_required', e.target.checked)}
+                    />
+                    Champ obligatoire
+                  </label>
+                </div>
+
+                {formFields.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFormField(index)}
+                    style={{
+                      padding: '8px 16px',
+                      background: '#e74c3c',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    🗑️ Supprimer
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={handleAddFormField}
+            style={{
+              padding: '10px 20px',
+              background: '#3498db',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: '600',
+            }}
+          >
+            + Ajouter un champ
           </button>
         </div>
 
