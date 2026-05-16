@@ -341,6 +341,12 @@ export default function EventCreate() {
     setLoading(true);
     setError(null);
 
+    if (!title.trim() || !description.trim() || !location.trim() || !startDate) {
+      setError('Veuillez remplir tous les champs obligatoires (titre, description, lieu, date de début)');
+      setLoading(false);
+      return;
+    }
+
     try {
       const eventData: EventFormData = {
         title,
@@ -472,13 +478,14 @@ export default function EventCreate() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="event-location">Lieu</label>
+              <label htmlFor="event-location">Lieu *</label>
               <input
                 id="event-location"
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Ex: Centre culturel de Constantine"
+                required
               />
             </div>
 
