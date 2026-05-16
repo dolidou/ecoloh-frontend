@@ -49,6 +49,7 @@ const THEME_PRESETS = {
 const FIELD_TYPES = [
   { value: 'text', label: 'Texte' },
   { value: 'email', label: 'Email' },
+  { value: 'number', label: 'Nombre' },
   { value: 'phone', label: 'Téléphone' },
   { value: 'textarea', label: 'Zone de texte' },
   { value: 'select', label: 'Liste déroulante' },
@@ -125,7 +126,7 @@ export default function EventCreate() {
   const [formFields, setFormFields] = useState<
     Array<{
       field_name: string;
-      field_type: 'text' | 'textarea' | 'checkbox' | 'email' | 'select' | 'phone';
+      field_type: 'text' | 'email' | 'number' | 'phone' | 'textarea' | 'select' | 'checkbox';
       field_label: string;
       is_required: boolean;
       display_order: number;

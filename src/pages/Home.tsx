@@ -989,7 +989,7 @@ export default function Home() {
                         />
                       ) : (
                         <input
-                          type={field.field_type === "email" ? "email" : "text"}
+                          type={field.field_type === "email" ? "email" : field.field_type === "number" ? "number" : "text"}
                           value={formData[field.field_name] || ""}
                           onChange={(e) =>
                             handleFormFieldChange(field.field_name, e.target.value)

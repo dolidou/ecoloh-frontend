@@ -52,7 +52,7 @@ export interface EventFormData {
   }>;
   form_fields?: Array<{
     field_name: string;
-    field_type: 'text' | 'email' | 'phone' | 'textarea' | 'select' | 'checkbox';
+    field_type: 'text' | 'email' | 'number' | 'phone' | 'textarea' | 'select' | 'checkbox';
     field_label: string;
     is_required?: boolean;
     display_order?: number;
